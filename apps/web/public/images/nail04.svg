@@ -1,0 +1,12 @@
+<svg xmlns="http://www.w3.org/2000/svg" width="800" height="800" viewBox="0 0 800 800">
+  <defs>
+    <linearGradient id="g" x1="0" y1="0" x2="1" y2="1">
+      <stop offset="0%" stop-color="#efe4d8"/>
+      <stop offset="100%" stop-color="#c9ad93"/>
+    </linearGradient>
+  </defs>
+  <rect width="800" height="800" fill="#f4eff0"/>
+  <rect x="80" y="120" width="640" height="560" rx="48" fill="url(#g)"/>
+  <text x="400" y="420" text-anchor="middle" font-family="sans-serif" font-size="48" fill="#3d2830">Nail 04</text>
+  <text x="400" y="480" text-anchor="middle" font-family="sans-serif" font-size="28" fill="#8a6d76">Ùü¸å</text>
+</svg>

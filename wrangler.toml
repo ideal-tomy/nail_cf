@@ -1,0 +1,38 @@
+# nail — Cloudflare Workers + Static Assets + D1 + R2
+# 正本: docs/cf-rebuild/nail-実装PLAN.md
+#
+# 初回デプロイ前:
+#   1. wrangler login
+#   2. wrangler d1 create nail-db  → database_id を下記に反映
+#   3. wrangler r2 bucket create nail-photos
+#   4. npm run db:migrate:remote
+#   5. npm run deploy
+
+name = "nail-cf"
+main = "workers/api/src/index.ts"
+compatibility_date = "2024-09-23"
+compatibility_flags = ["nodejs_compat"]
+
+[assets]
+directory = "apps/web/dist"
+not_found_handling = "single-page-application"
+binding = "ASSETS"
+
+[[d1_databases]]
+binding = "DB"
+database_name = "nail-db"
+# ローカル開発は wrangler が自動生成。本番は `wrangler d1 create nail-db` の id に差し替える
+database_id = "00000000-0000-0000-0000-000000000001"
+migrations_dir = "migrations"
+
+[[r2_buckets]]
+binding = "PHOTOS"
+bucket_name = "nail-photos"
+
+[vars]
+SESSION_SECRET = "dev-change-me"
+DEMO_EMAIL = "demo@example.com"
+DEMO_PASSWORD = "changeme"
+
+# 本番の秘密情報は Dashboard または `wrangler secret put` で設定
+# SESSION_SECRET, DEMO_PASSWORD など

@@ -1,0 +1,39 @@
+@import 'tailwindcss';
+
+:root {
+  color-scheme: light only;
+  --porcelain: #f4eff0;
+  --blush: #fbeef1;
+  --petal: #ead8dd;
+  --mauve: #8a6d76;
+  --plum: #a8455c;
+  --ink: #3d2830;
+  --card: #ffffff;
+  --line-green: #06c755;
+}
+
+@theme {
+  --color-porcelain: var(--porcelain);
+  --color-blush: var(--blush);
+  --color-petal: var(--petal);
+  --color-mauve: var(--mauve);
+  --color-plum: var(--plum);
+  --color-ink: var(--ink);
+  --color-card: var(--card);
+  --color-line-green: var(--line-green);
+}
+
+html,
+body,
+#root {
+  min-height: 100%;
+}
+
+body {
+  margin: 0;
+  background: var(--porcelain);
+  color: var(--ink);
+  font-family: -apple-system, BlinkMacSystemFont, 'Hiragino Sans', 'Noto Sans JP',
+    'Yu Gothic', sans-serif;
+  -webkit-font-smoothing: antialiased;
+}

@@ -1,0 +1,28 @@
+{
+  "name": "nail-cf",
+  "private": true,
+  "version": "0.1.0",
+  "type": "module",
+  "workspaces": [
+    "apps/web",
+    "workers/api"
+  ],
+  "scripts": {
+    "dev": "npm run build:web && wrangler dev",
+    "dev:web": "npm run dev -w @nail-cf/web",
+    "build": "npm run build -w @nail-cf/web",
+    "build:web": "npm run build -w @nail-cf/web",
+    "deploy": "npm run build && wrangler deploy",
+    "db:migrate:local": "wrangler d1 migrations apply nail-db --local",
+    "db:migrate:remote": "wrangler d1 migrations apply nail-db --remote",
+    "db:seed:local": "wrangler d1 execute nail-db --local --file=seed/demo.sql",
+    "db:seed:remote": "wrangler d1 execute nail-db --remote --file=seed/demo.sql",
+    "typecheck": "npm run typecheck -w @nail-cf/web && npm run typecheck -w @nail-cf/api"
+  },
+  "devDependencies": {
+    "wrangler": "^4.14.0"
+  },
+  "engines": {
+    "node": ">=20"
+  }
+}
