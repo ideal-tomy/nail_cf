@@ -135,6 +135,12 @@ Workers の URL（例: `https://nail-cf.<account>.workers.dev`）でアプリ全
 
 ---
 
+## Cursor エージェントが止まったとき
+
+実装依頼中に Cursor エージェントが動かなく見える場合は、ワークスペース共通の **[docs/cursor-agent-運用.md](../docs/cursor-agent-運用.md)**（再発防止チェックリスト・症状別対処）を参照。
+
+---
+
 ## よくあるつまずき
 
 | 症状 | 対処 |
