@@ -86,10 +86,35 @@ export async function getCustomer(id: string): Promise<Customer> {
   return data.customer;
 }
 
+function toCustomerBody(input: Partial<CustomerInput>) {
+  return {
+    ...(input.name !== undefined ? { name: input.name } : {}),
+    ...(input.nameKana !== undefined ? { name_kana: input.nameKana } : {}),
+    ...(input.phone !== undefined ? { phone: input.phone } : {}),
+    ...(input.lineName !== undefined ? { line_name: input.lineName } : {}),
+    ...(input.birthday !== undefined ? { birthday: input.birthday } : {}),
+    ...(input.preference !== undefined ? { preference: input.preference } : {}),
+    ...(input.note !== undefined ? { note: input.note } : {}),
+    ...(input.contactIntervalDays !== undefined
+      ? { contact_interval_days: input.contactIntervalDays }
+      : {}),
+  };
+}
+
+function toVisitBody(input: VisitInput) {
+  return {
+    visited_on: input.visitedOn,
+    menu: input.menu,
+    design: input.design,
+    note: input.note,
+    price: input.price,
+  };
+}
+
 export async function createCustomer(input: CustomerInput): Promise<Customer> {
   const data = await request<{ customer: Customer }>('/api/customers', {
     method: 'POST',
-    body: JSON.stringify(input),
+    body: JSON.stringify(toCustomerBody(input)),
   });
   return data.customer;
 }
@@ -97,7 +122,7 @@ export async function createCustomer(input: CustomerInput): Promise<Customer> {
 export async function updateCustomer(id: string, input: Partial<CustomerInput>): Promise<Customer> {
   const data = await request<{ customer: Customer }>(`/api/customers/${id}`, {
     method: 'PATCH',
-    body: JSON.stringify(input),
+    body: JSON.stringify(toCustomerBody(input)),
   });
   return data.customer;
 }
@@ -110,9 +135,35 @@ export async function listVisits(customerId: string): Promise<Visit[]> {
 export async function createVisit(customerId: string, input: VisitInput): Promise<Visit> {
   const data = await request<{ visit: Visit }>(`/api/customers/${customerId}/visits`, {
     method: 'POST',
-    body: JSON.stringify(input),
+    body: JSON.stringify(toVisitBody(input)),
   });
   return data.visit;
+}
+
+export async function updateVisit(
+  customerId: string,
+  visitId: string,
+  input: Partial<VisitInput>,
+): Promise<Visit> {
+  const body: Record<string, unknown> = {};
+  if (input.visitedOn !== undefined) body.visited_on = input.visitedOn;
+  if (input.menu !== undefined) body.menu = input.menu;
+  if (input.design !== undefined) body.design = input.design;
+  if (input.note !== undefined) body.note = input.note;
+  if (input.price !== undefined) body.price = input.price;
+
+  const data = await request<{ visit: Visit }>(
+    `/api/customers/${customerId}/visits/${visitId}`,
+    {
+      method: 'PATCH',
+      body: JSON.stringify(body),
+    },
+  );
+  return data.visit;
+}
+
+export async function deleteVisit(customerId: string, visitId: string): Promise<void> {
+  await request(`/api/customers/${customerId}/visits/${visitId}`, { method: 'DELETE' });
 }
 
 export async function fetchHome(): Promise<{

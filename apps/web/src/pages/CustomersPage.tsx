@@ -61,14 +61,17 @@ export function CustomersPage() {
           <li key={customer.id}>
             <Link
               to={`/customers/${customer.id}`}
-              className="block rounded-2xl bg-card px-4 py-3 shadow-sm transition hover:bg-blush/30"
+              className="flex items-center gap-3 rounded-2xl bg-card px-4 py-3 shadow-sm transition hover:bg-blush/30 active:bg-blush/40"
             >
-              <p className="font-semibold text-ink">{customer.name}</p>
-              {(customer.phone || customer.preference) && (
-                <p className="mt-1 text-xs text-mauve">
-                  {[customer.phone, customer.preference].filter(Boolean).join(' · ')}
-                </p>
-              )}
+              <div className="min-w-0 flex-1">
+                <p className="font-semibold text-ink">{customer.name}</p>
+                {(customer.phone || customer.preference) && (
+                  <p className="mt-1 text-xs text-mauve">
+                    {[customer.phone, customer.preference].filter(Boolean).join(' · ')}
+                  </p>
+                )}
+              </div>
+              <span className="shrink-0 text-xs font-bold text-plum">履歴 ›</span>
             </Link>
           </li>
         ))}

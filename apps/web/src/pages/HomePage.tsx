@@ -44,10 +44,11 @@ export function HomePage() {
       </section>
 
       <section>
-        <p className="mb-2 text-[13px] font-bold tracking-wide text-mauve">
+        <p className="mb-1 text-[13px] font-bold tracking-wide text-mauve">
           そろそろ連絡する人
           {!loading && `（${recommendations.length}人）`}
         </p>
+        <p className="mb-2 text-xs text-mauve">タップすると連絡文面を作成できます（顧客詳細には移動しません）</p>
 
         {loading && <p className="text-sm text-mauve">読み込み中…</p>}
         {error && <p className="text-sm text-plum">{error}</p>}

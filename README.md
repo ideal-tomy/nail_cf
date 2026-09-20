@@ -104,12 +104,20 @@ npm run db:seed:remote
 
 ### 5. 秘密情報（本番）
 
-```bash
+**エージェントに実行させない。** `secret put` は標準入力待ちのため、チャットが止まって見える。自分の PowerShell で行う。
+
+値を引数に付けると失敗する（`Unknown argument`）。
+
+```powershell
+# NG: npx wrangler secret put SESSION_SECRET ここに値
+# OK: プロンプトに値を貼る（入力は画面に出ない）
 npx wrangler secret put SESSION_SECRET
 npx wrangler secret put DEMO_PASSWORD
 # DEMO_EMAIL も変える場合
 npx wrangler secret put DEMO_EMAIL
 ```
+
+Worker がまだ無い場合、`secret put` が「新しい Worker を作るか」と聞いて止まる。先に `npm run deploy` するか、Dashboard → Workers → Variables から入れる。
 
 ### 6. デプロイ
 
@@ -165,3 +173,5 @@ Workers の URL（例: `https://nail-cf.<account>.workers.dev`）でアプリ全
 ## 次のステップ（kuruma）
 
 nail v1 受け入れ後、[kuruma 実装 PLAN](../docs/cf-rebuild/kuruma-実装PLAN.md) に従い `kuruma_cf/` へ進みます。
+
+Agent test

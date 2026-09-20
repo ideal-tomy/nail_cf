@@ -113,6 +113,7 @@ export function BookingsPage() {
 
       <Modal open={showCreate} onClose={() => setShowCreate(false)} title="予約を追加">
         <BookingForm
+          allowNewCustomer
           defaultStartsAt={defaultStartsAt}
           onCancel={() => setShowCreate(false)}
           onSubmit={async (input) => {

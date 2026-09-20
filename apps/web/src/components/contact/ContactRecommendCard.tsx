@@ -40,7 +40,9 @@ export function ContactRecommendCard({ recommendation, onCompose }: Props) {
           {recommendation.daysSince}日たちました
         </p>
       </div>
-      <span className="shrink-0 text-xl text-petal">›</span>
+      <span className="shrink-0 rounded-full bg-blush px-2.5 py-1 text-xs font-bold text-plum">
+        文面作成
+      </span>
     </button>
   );
 }

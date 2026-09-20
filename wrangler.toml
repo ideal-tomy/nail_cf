@@ -22,7 +22,7 @@ binding = "ASSETS"
 binding = "DB"
 database_name = "nail-db"
 # ローカル開発は wrangler が自動生成。本番は `wrangler d1 create nail-db` の id に差し替える
-database_id = "00000000-0000-0000-0000-000000000001"
+database_id = "511971f2-b449-46c9-8947-b48f59d39530"
 migrations_dir = "migrations"
 
 [[r2_buckets]]

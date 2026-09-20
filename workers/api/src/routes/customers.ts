@@ -3,6 +3,7 @@ import type { AppEnv } from '../env';
 import { badRequest, notFound } from '../lib/errors';
 import { newId } from '../lib/ids';
 import { nowIso } from '../lib/time';
+import { deleteStoredPhotos } from '../lib/visitPhotos';
 import type {
   CustomerInput,
   CustomerRow,
@@ -265,6 +266,83 @@ customers.post('/:id/visits', async (c) => {
 
   if (!row) return c.json({ error: 'Failed to create visit' }, 500);
   return c.json({ visit: rowToVisit(row, []) }, 201);
+});
+
+customers.patch('/:id/visits/:visitId', async (c) => {
+  const customerId = c.req.param('id');
+  const visitId = c.req.param('visitId');
+
+  const existing = await c.env.DB.prepare(
+    'SELECT * FROM visits WHERE id = ? AND customer_id = ?',
+  )
+    .bind(visitId, customerId)
+    .first<VisitRow>();
+
+  if (!existing) return notFound(c, 'Visit not found');
+
+  const body = await c.req.json<VisitInput>();
+  const visitedOn =
+    body.visited_on !== undefined ? body.visited_on.trim() : existing.visited_on;
+  if (!visitedOn) return badRequest(c, 'visited_on is required');
+
+  const price =
+    body.price !== undefined ? body.price : existing.price;
+  if (price != null && (price < 0 || !Number.isInteger(price))) {
+    return badRequest(c, 'price must be a non-negative integer');
+  }
+
+  const ts = nowIso();
+  await c.env.DB.prepare(
+    `UPDATE visits SET
+      visited_on = ?, menu = ?, design = ?, note = ?, price = ?, updated_at = ?
+     WHERE id = ? AND customer_id = ?`,
+  )
+    .bind(
+      visitedOn,
+      body.menu !== undefined ? body.menu?.trim() || null : existing.menu,
+      body.design !== undefined ? body.design?.trim() || null : existing.design,
+      body.note !== undefined ? body.note?.trim() || null : existing.note,
+      price,
+      ts,
+      visitId,
+      customerId,
+    )
+    .run();
+
+  const row = await c.env.DB.prepare('SELECT * FROM visits WHERE id = ?')
+    .bind(visitId)
+    .first<VisitRow>();
+
+  if (!row) return notFound(c, 'Visit not found');
+
+  const photoMap = await loadPhotos(c.env.DB, [visitId]);
+  return c.json({ visit: rowToVisit(row, photoMap.get(visitId) ?? []) });
+});
+
+customers.delete('/:id/visits/:visitId', async (c) => {
+  const customerId = c.req.param('id');
+  const visitId = c.req.param('visitId');
+
+  const existing = await c.env.DB.prepare(
+    'SELECT * FROM visits WHERE id = ? AND customer_id = ?',
+  )
+    .bind(visitId, customerId)
+    .first<VisitRow>();
+
+  if (!existing) return notFound(c, 'Visit not found');
+
+  const { results: photos } = await c.env.DB.prepare(
+    'SELECT * FROM visit_photos WHERE visit_id = ?',
+  )
+    .bind(visitId)
+    .all<VisitPhotoRow>();
+
+  await deleteStoredPhotos(c.env.PHOTOS, photos ?? []);
+  await c.env.DB.prepare('DELETE FROM visits WHERE id = ? AND customer_id = ?')
+    .bind(visitId, customerId)
+    .run();
+
+  return c.json({ ok: true });
 });
 
 export { customers };

@@ -1,6 +1,7 @@
 import { useNavigate } from 'react-router-dom';
 import { createCustomer } from '../lib/api';
 import { CustomerForm } from '../components/customers/CustomerForm';
+import { SubPageHeader } from '../components/ui/SubPageHeader';
 import { useToast } from '../components/ui/Toast';
 
 export function CustomerNewPage() {
@@ -9,7 +10,7 @@ export function CustomerNewPage() {
 
   return (
     <div className="space-y-4">
-      <h2 className="text-lg font-bold text-ink">顧客を登録</h2>
+      <SubPageHeader backTo="/customers" backLabel="顧客一覧" title="顧客を登録" />
       <section className="rounded-2xl bg-card p-4 shadow-sm">
         <CustomerForm
           submitLabel="登録する"

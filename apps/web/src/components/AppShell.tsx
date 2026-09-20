@@ -1,16 +1,25 @@
-import { NavLink, Outlet, useNavigate } from 'react-router-dom';
+import { NavLink, Outlet, useLocation, useNavigate } from 'react-router-dom';
 import { useAuth } from '../lib/auth';
 import { Button } from './ui/Button';
 
 const linkClass = ({ isActive }: { isActive: boolean }) =>
   [
-    'flex flex-1 flex-col items-center gap-1 py-2 text-xs font-semibold',
-    isActive ? 'text-plum' : 'text-mauve',
+    'flex flex-1 flex-col items-center gap-1 border-t-2 py-2 text-xs font-semibold',
+    isActive ? 'border-plum text-plum' : 'border-transparent text-mauve',
   ].join(' ');
+
+function sectionLabel(pathname: string): string | null {
+  if (pathname === '/') return 'ホーム';
+  if (pathname === '/customers' || pathname.startsWith('/customers/')) return '顧客';
+  if (pathname === '/bookings') return '予約';
+  return null;
+}
 
 export function AppShell() {
   const navigate = useNavigate();
+  const location = useLocation();
   const { email, logout } = useAuth();
+  const section = sectionLabel(location.pathname);
 
   const handleLogout = async () => {
     await logout();
@@ -23,7 +32,11 @@ export function AppShell() {
         <div className="flex items-start justify-between gap-3">
           <div>
             <h1 className="text-lg font-bold text-ink">ネイルサロン</h1>
-            <p className="text-xs text-mauve">{email ?? 'Cloudflare 版'}</p>
+            <p className="text-xs text-mauve">
+              {section && <span className="font-semibold text-plum">{section}</span>}
+              {section && ' · '}
+              {email ?? 'Cloudflare 版'}
+            </p>
           </div>
           <Button variant="ghost" className="px-2 py-1 text-xs" onClick={() => void handleLogout()}>
             ログアウト

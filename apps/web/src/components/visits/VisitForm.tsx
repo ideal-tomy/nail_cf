@@ -1,28 +1,47 @@
-import { useMemo, useState } from 'react';
-import type { VisitInput } from '../../lib/types';
+import { useEffect, useMemo, useState } from 'react';
+import type { Visit, VisitInput } from '../../lib/types';
 import { Button } from '../ui/Button';
 import { Field, inputClass } from '../ui/Field';
+import { PhotoGallery } from './PhotoGallery';
+
+const MAX_PHOTOS = 5;
 
 type Props = {
+  initial?: Visit;
+  submitLabel?: string;
   onSubmit: (input: VisitInput, photos: File[]) => Promise<void>;
   onCancel?: () => void;
 };
 
-export function VisitForm({ onSubmit, onCancel }: Props) {
+export function VisitForm({ initial, submitLabel, onSubmit, onCancel }: Props) {
   const today = useMemo(() => new Date().toISOString().slice(0, 10), []);
-  const [visitedOn, setVisitedOn] = useState(today);
-  const [design, setDesign] = useState('');
-  const [menu, setMenu] = useState('');
-  const [note, setNote] = useState('');
-  const [price, setPrice] = useState('');
+  const existingPhotoCount = initial?.photos.length ?? 0;
+  const maxNewPhotos = Math.max(0, MAX_PHOTOS - existingPhotoCount);
+
+  const [visitedOn, setVisitedOn] = useState(initial?.visitedOn ?? today);
+  const [design, setDesign] = useState(initial?.design ?? '');
+  const [menu, setMenu] = useState(initial?.menu ?? '');
+  const [note, setNote] = useState(initial?.note ?? '');
+  const [price, setPrice] = useState(initial?.price != null ? String(initial.price) : '');
   const [files, setFiles] = useState<File[]>([]);
   const [previews, setPreviews] = useState<string[]>([]);
   const [saving, setSaving] = useState(false);
   const [error, setError] = useState<string | null>(null);
 
+  useEffect(() => {
+    if (!initial) return;
+    setVisitedOn(initial.visitedOn);
+    setDesign(initial.design ?? '');
+    setMenu(initial.menu ?? '');
+    setNote(initial.note ?? '');
+    setPrice(initial.price != null ? String(initial.price) : '');
+    setFiles([]);
+    setPreviews([]);
+  }, [initial]);
+
   const handleFiles = (list: FileList | null) => {
-    if (!list) return;
-    const next = [...files, ...Array.from(list)].slice(0, 5);
+    if (!list || maxNewPhotos === 0) return;
+    const next = [...files, ...Array.from(list)].slice(0, maxNewPhotos);
     setFiles(next);
     setPreviews(next.map((f) => URL.createObjectURL(f)));
   };
@@ -53,6 +72,11 @@ export function VisitForm({ onSubmit, onCancel }: Props) {
       setSaving(false);
     }
   };
+
+  const photoHint =
+    maxNewPhotos > 0
+      ? `最大${MAX_PHOTOS}枚。あと${maxNewPhotos}枚追加できます。アップロード前に自動圧縮します`
+      : `最大${MAX_PHOTOS}枚に達しています`;
 
   return (
     <form className="space-y-4" onSubmit={handleSubmit}>
@@ -88,12 +112,19 @@ export function VisitForm({ onSubmit, onCancel }: Props) {
         <textarea className={`${inputClass} min-h-20`} value={note} onChange={(e) => setNote(e.target.value)} />
       </Field>
 
-      <Field label="完成写真" hint="最大5枚。アップロード前に自動圧縮します">
+      {initial && initial.photos.length > 0 && (
+        <Field label="登録済みの写真">
+          <PhotoGallery photos={initial.photos} />
+        </Field>
+      )}
+
+      <Field label="完成写真" hint={photoHint}>
         <input
-          className="block w-full text-sm text-mauve file:mr-3 file:rounded-lg file:border-0 file:bg-blush file:px-3 file:py-2 file:text-sm file:font-semibold file:text-plum"
+          className="block w-full text-sm text-mauve file:mr-3 file:rounded-lg file:border-0 file:bg-blush file:px-3 file:py-2 file:text-sm file:font-semibold file:text-plum disabled:opacity-50"
           type="file"
           accept="image/*"
           multiple
+          disabled={maxNewPhotos === 0}
           onChange={(e) => handleFiles(e.target.files)}
         />
         {previews.length > 0 && (
@@ -114,7 +145,7 @@ export function VisitForm({ onSubmit, onCancel }: Props) {
           </Button>
         )}
         <Button type="submit" className="flex-1" disabled={saving}>
-          {saving ? '保存中…' : '来店を保存'}
+          {saving ? '保存中…' : (submitLabel ?? '来店を保存')}
         </Button>
       </div>
     </form>

@@ -1,6 +1,6 @@
 import { useEffect, useState } from 'react';
 import { createContactLog } from '../../lib/api';
-import { copyMessage, isMobileDevice, sendViaLine } from '../../lib/line';
+import { copyMessage } from '../../lib/line';
 import { buildMessage, jpDate } from '../../lib/messageTemplates';
 import { photoUrl } from '../../lib/photos';
 import type { ContactRecommendation, MessageTemplate } from '../../lib/types';
@@ -47,10 +47,6 @@ export function MessageEditorModal({
   const handleCopy = async () => {
     await copyMessage(message);
     showToast('コピーしました');
-  };
-
-  const handleSendLine = () => {
-    sendViaLine(message);
   };
 
   const handleMarkContacted = async () => {
@@ -129,18 +125,12 @@ export function MessageEditorModal({
         />
 
         <div className="space-y-2.5">
-          <Button className="w-full" variant="secondary" onClick={handleCopy}>
+          <Button className="w-full" onClick={handleCopy}>
             文面をコピー
           </Button>
-          {isMobileDevice() ? (
-            <Button className="w-full" variant="line" onClick={handleSendLine}>
-              LINEで送る
-            </Button>
-          ) : (
-            <p className="text-center text-xs text-mauve">
-              PC では「文面をコピー」をご利用ください
-            </p>
-          )}
+          <p className="text-center text-xs leading-relaxed text-mauve">
+            コピーして LINE などにお貼り付けてください
+          </p>
           <Button
             className="w-full"
             variant="secondary"

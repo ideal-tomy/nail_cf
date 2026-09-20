@@ -2,9 +2,11 @@ import { useCallback, useEffect, useMemo, useState } from 'react';
 import { Link, useParams } from 'react-router-dom';
 import {
   createVisit,
+  deleteVisit,
   getCustomer,
   listVisits,
   updateCustomer,
+  updateVisit,
   uploadVisitPhotos,
 } from '../lib/api';
 import { formatDate, formatPrice } from '../lib/format';
@@ -12,8 +14,10 @@ import { compressForUpload } from '../lib/imageCompress';
 import type { Customer, Visit } from '../lib/types';
 import { CustomerForm } from '../components/customers/CustomerForm';
 import { VisitForm } from '../components/visits/VisitForm';
+import { VisitHistoryItem } from '../components/visits/VisitHistoryItem';
 import { PhotoGallery } from '../components/visits/PhotoGallery';
 import { Button } from '../components/ui/Button';
+import { SubPageHeader } from '../components/ui/SubPageHeader';
 import { useToast } from '../components/ui/Toast';
 import { EmptyState } from '../components/ui/EmptyState';
 
@@ -25,6 +29,7 @@ export function CustomerDetailPage() {
   const [error, setError] = useState<string | null>(null);
   const [editing, setEditing] = useState(false);
   const [addingVisit, setAddingVisit] = useState(false);
+  const [editingVisitId, setEditingVisitId] = useState<string | null>(null);
   const { showToast } = useToast();
 
   const reload = useCallback(async () => {
@@ -71,17 +76,16 @@ export function CustomerDetailPage() {
 
   return (
     <div className="space-y-4">
-      <div className="flex items-start justify-between gap-3">
-        <div>
-          <Link to="/customers" className="text-xs font-semibold text-mauve">
-            ← 顧客一覧
-          </Link>
-          <h2 className="mt-1 text-xl font-bold text-ink">{customer.name}</h2>
-        </div>
-        <Button variant="secondary" onClick={() => setEditing((v) => !v)}>
-          {editing ? '閉じる' : '編集'}
-        </Button>
-      </div>
+      <SubPageHeader
+        backTo="/customers"
+        backLabel="顧客一覧"
+        title={customer.name}
+        action={
+          <Button variant="secondary" onClick={() => setEditing((v) => !v)}>
+            {editing ? '閉じる' : '編集'}
+          </Button>
+        }
+      />
 
       {editing ? (
         <section className="rounded-2xl bg-card p-4 shadow-sm">
@@ -153,7 +157,13 @@ export function CustomerDetailPage() {
       <section className="space-y-3">
         <div className="flex items-center justify-between">
           <h3 className="text-sm font-bold text-mauve">来店履歴</h3>
-          <Button variant="secondary" onClick={() => setAddingVisit((v) => !v)}>
+          <Button
+            variant="secondary"
+            onClick={() => {
+              setAddingVisit((v) => !v);
+              setEditingVisitId(null);
+            }}
+          >
             {addingVisit ? '閉じる' : '来店を追加'}
           </Button>
         </div>
@@ -181,24 +191,46 @@ export function CustomerDetailPage() {
         ) : (
           <ul className="space-y-3">
             {visits.map((visit) => (
-              <li key={visit.id} className="rounded-2xl bg-card p-4 shadow-sm">
-                <div className="flex items-start justify-between gap-3">
-                  <div>
-                    <p className="font-semibold text-ink">{visit.design ?? 'デザイン未入力'}</p>
-                    <p className="mt-1 text-xs text-mauve">
-                      {formatDate(visit.visitedOn)} · {formatPrice(visit.price)}
-                    </p>
-                    {visit.note && (
-                      <p className="mt-2 text-sm text-mauve whitespace-pre-wrap">{visit.note}</p>
-                    )}
-                  </div>
-                </div>
-                {visit.photos.length > 0 && (
-                  <div className="mt-3">
-                    <PhotoGallery photos={visit.photos} />
+              <VisitHistoryItem
+                key={visit.id}
+                visit={visit}
+                editing={editingVisitId === visit.id}
+                onEdit={() => {
+                  setEditingVisitId(visit.id);
+                  setAddingVisit(false);
+                }}
+                onDelete={async () => {
+                  if (!window.confirm('この来店履歴を削除しますか？')) return;
+                  try {
+                    await deleteVisit(id, visit.id);
+                    await reload();
+                    if (editingVisitId === visit.id) setEditingVisitId(null);
+                    showToast('来店履歴を削除しました');
+                  } catch (e: unknown) {
+                    showToast(e instanceof Error ? e.message : '削除に失敗しました');
+                  }
+                }}
+              >
+                {editingVisitId === visit.id && (
+                  <div className="mt-4 border-t border-petal pt-4">
+                    <VisitForm
+                      initial={visit}
+                      submitLabel="更新する"
+                      onCancel={() => setEditingVisitId(null)}
+                      onSubmit={async (input, photoFiles) => {
+                        await updateVisit(id, visit.id, input);
+                        for (const file of photoFiles) {
+                          const { display, thumb } = await compressForUpload(file);
+                          await uploadVisitPhotos(visit.id, display, thumb);
+                        }
+                        await reload();
+                        setEditingVisitId(null);
+                        showToast('来店履歴を更新しました');
+                      }}
+                    />
                   </div>
                 )}
-              </li>
+              </VisitHistoryItem>
             ))}
           </ul>
         )}

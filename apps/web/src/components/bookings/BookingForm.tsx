@@ -1,5 +1,5 @@
 import { useEffect, useState } from 'react';
-import { listCustomers } from '../../lib/api';
+import { createCustomer, listCustomers } from '../../lib/api';
 import { localDatetimeToIso, nowLocalDatetimeValue, toLocalDatetimeValue } from '../../lib/dates';
 import type { Booking, Customer } from '../../lib/types';
 import { Button } from '../ui/Button';
@@ -9,6 +9,7 @@ type Props = {
   initial?: Booking;
   fixedCustomerId?: string;
   defaultStartsAt?: string;
+  allowNewCustomer?: boolean;
   onSubmit: (input: {
     customerId: string;
     startsAt: string;
@@ -19,15 +20,21 @@ type Props = {
   onCancel: () => void;
 };
 
+type CustomerMode = 'existing' | 'new';
+
 export function BookingForm({
   initial,
   fixedCustomerId,
   defaultStartsAt,
+  allowNewCustomer = false,
   onSubmit,
   onCancel,
 }: Props) {
   const [customers, setCustomers] = useState<Customer[]>([]);
+  const [customerMode, setCustomerMode] = useState<CustomerMode>('existing');
   const [customerId, setCustomerId] = useState(fixedCustomerId ?? initial?.customerId ?? '');
+  const [newCustomerName, setNewCustomerName] = useState('');
+  const [newCustomerPhone, setNewCustomerPhone] = useState('');
   const [startsAt, setStartsAt] = useState(
     initial ? toLocalDatetimeValue(initial.startsAt) : (defaultStartsAt ?? nowLocalDatetimeValue()),
   );
@@ -36,6 +43,8 @@ export function BookingForm({
   const [note, setNote] = useState(initial?.note ?? '');
   const [saving, setSaving] = useState(false);
   const [error, setError] = useState<string | null>(null);
+
+  const canRegisterNewCustomer = allowNewCustomer && !fixedCustomerId && !initial;
 
   useEffect(() => {
     listCustomers()
@@ -59,10 +68,19 @@ export function BookingForm({
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
     setError(null);
-    if (!customerId) {
+
+    let resolvedCustomerId = customerId;
+    if (canRegisterNewCustomer && customerMode === 'new') {
+      const name = newCustomerName.trim();
+      if (!name) {
+        setError('新規顧客のお名前を入力してください');
+        return;
+      }
+    } else if (!resolvedCustomerId) {
       setError('顧客を選択してください');
       return;
     }
+
     const duration = Number(durationMin);
     if (!Number.isFinite(duration) || duration < 15) {
       setError('施術時間は15分以上で入力してください');
@@ -71,8 +89,16 @@ export function BookingForm({
 
     setSaving(true);
     try {
+      if (canRegisterNewCustomer && customerMode === 'new') {
+        const customer = await createCustomer({
+          name: newCustomerName.trim(),
+          phone: newCustomerPhone.trim() || undefined,
+        });
+        resolvedCustomerId = customer.id;
+      }
+
       await onSubmit({
-        customerId,
+        customerId: resolvedCustomerId,
         startsAt: localDatetimeToIso(startsAt),
         durationMin: duration,
         menu: menu.trim() || undefined,
@@ -89,19 +115,70 @@ export function BookingForm({
     <form className="space-y-4" onSubmit={handleSubmit}>
       {!fixedCustomerId && (
         <Field label="顧客 *">
-          <select
-            className={inputClass}
-            value={customerId}
-            onChange={(e) => setCustomerId(e.target.value)}
-            required
-          >
-            <option value="">選択してください</option>
-            {customers.map((c) => (
-              <option key={c.id} value={c.id}>
-                {c.name}
-              </option>
-            ))}
-          </select>
+          {canRegisterNewCustomer && (
+            <div className="mb-2 flex gap-2">
+              <button
+                type="button"
+                onClick={() => setCustomerMode('existing')}
+                className={[
+                  'flex-1 rounded-full border px-3 py-2 text-sm font-semibold',
+                  customerMode === 'existing'
+                    ? 'border-plum bg-plum text-white'
+                    : 'border-petal bg-card text-mauve',
+                ].join(' ')}
+              >
+                登録済み
+              </button>
+              <button
+                type="button"
+                onClick={() => setCustomerMode('new')}
+                className={[
+                  'flex-1 rounded-full border px-3 py-2 text-sm font-semibold',
+                  customerMode === 'new'
+                    ? 'border-plum bg-plum text-white'
+                    : 'border-petal bg-card text-mauve',
+                ].join(' ')}
+              >
+                新規登録
+              </button>
+            </div>
+          )}
+
+          {canRegisterNewCustomer && customerMode === 'new' ? (
+            <div className="space-y-3 rounded-xl border border-petal bg-blush/30 p-3">
+              <Field label="お名前 *">
+                <input
+                  className={inputClass}
+                  value={newCustomerName}
+                  onChange={(e) => setNewCustomerName(e.target.value)}
+                  placeholder="例: 田中 ゆい"
+                  required
+                />
+              </Field>
+              <Field label="連絡先">
+                <input
+                  className={inputClass}
+                  value={newCustomerPhone}
+                  onChange={(e) => setNewCustomerPhone(e.target.value)}
+                  placeholder="090-xxxx / LINE など"
+                />
+              </Field>
+            </div>
+          ) : (
+            <select
+              className={inputClass}
+              value={customerId}
+              onChange={(e) => setCustomerId(e.target.value)}
+              required
+            >
+              <option value="">選択してください</option>
+              {customers.map((c) => (
+                <option key={c.id} value={c.id}>
+                  {c.name}
+                </option>
+              ))}
+            </select>
+          )}
         </Field>
       )}
 

@@ -44,8 +44,8 @@ INSERT INTO contact_logs (id, customer_id, sent_at, channel, template_key, body)
   ('df7a3ca7-249a-435d-ae91-6a751aacd290', '44444444-4444-4444-4444-444444444444', '2026-09-10T00:00:00.000Z', 'line_share', 'tpl-soon', 'あかりさん、こんにちは。前回のベージュグラデから…');
 
 INSERT INTO visit_photos (id, visit_id, path, thumb_path, sort_order, created_at) VALUES
-  ('7c34648f-b838-4a06-bc7d-615613904922', 'aaaaaaaa-aaaa-aaaa-aaaa-aaaaaaaaaaaa', 'images/nail01.svg', 'images/nail01.svg', 0, '2026-06-20T12:43:15.863Z'),
-  ('310cacf7-ba7f-4785-ba3e-be96522bc831', 'bbbbbbbb-bbbb-bbbb-bbbb-bbbbbbbbbbbb', 'images/nail02.svg', 'images/nail02.svg', 0, '2026-06-20T12:43:15.863Z'),
-  ('3080df53-ce4c-42ef-9f8a-0317a608888f', 'cccccccc-cccc-cccc-cccc-cccccccccccc', 'images/nail03.svg', 'images/nail03.svg', 0, '2026-06-20T12:43:15.863Z'),
-  ('b5cfc436-3780-4a7e-a08b-d70439b05703', 'dddddddd-dddd-dddd-dddd-dddddddddddd', 'images/nail04.svg', 'images/nail04.svg', 0, '2026-06-20T12:43:15.863Z'),
-  ('29989a7c-7e65-4bbd-803d-639dac5d403b', 'eeeeeeee-eeee-eeee-eeee-eeeeeeeeeeee', 'images/nail05.svg', 'images/nail05.svg', 0, '2026-06-20T12:43:15.863Z');
+  ('7c34648f-b838-4a06-bc7d-615613904922', 'aaaaaaaa-aaaa-aaaa-aaaa-aaaaaaaaaaaa', 'images/nail01.jpg', 'images/nail01.jpg', 0, '2026-06-20T12:43:15.863Z'),
+  ('310cacf7-ba7f-4785-ba3e-be96522bc831', 'bbbbbbbb-bbbb-bbbb-bbbb-bbbbbbbbbbbb', 'images/nail02.jpg', 'images/nail02.jpg', 0, '2026-06-20T12:43:15.863Z'),
+  ('3080df53-ce4c-42ef-9f8a-0317a608888f', 'cccccccc-cccc-cccc-cccc-cccccccccccc', 'images/nail03.jpg', 'images/nail03.jpg', 0, '2026-06-20T12:43:15.863Z'),
+  ('b5cfc436-3780-4a7e-a08b-d70439b05703', 'dddddddd-dddd-dddd-dddd-dddddddddddd', 'images/nail04.jpg', 'images/nail04.jpg', 0, '2026-06-20T12:43:15.863Z'),
+  ('29989a7c-7e65-4bbd-803d-639dac5d403b', 'eeeeeeee-eeee-eeee-eeee-eeeeeeeeeeee', 'images/nail05.jpg', 'images/nail05.jpg', 0, '2026-06-20T12:43:15.863Z');
